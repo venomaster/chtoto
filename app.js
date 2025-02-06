@@ -1,14 +1,21 @@
+const path = require('path');
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const app = express();
 const port = 3000;
 
 app.use(express.json()); 
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname))); // Раздаём статические файлы
 
+// Отдаём index.html при заходе на /
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Подключение к базе данных
 const db = new sqlite3.Database('database.db');
 
-
+// API маршруты
 app.get('/api/users', (req, res) => {
     db.all("SELECT * FROM users", [], (err, rows) => {
       if (err) {
@@ -30,7 +37,6 @@ app.post('/api/users', (req, res) => {
     });
 });
 
-
 app.put('/api/users/:id', (req, res) => {
     const { name, age } = req.body;
     const { id } = req.params;
@@ -45,7 +51,6 @@ app.put('/api/users/:id', (req, res) => {
         res.status(200).json({ id, name, age });
     });
 });
-
 
 app.delete('/api/users/:id', (req, res) => {
     const { id } = req.params;
